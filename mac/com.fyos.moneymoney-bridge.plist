@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Iter-1223 MoneyMoney-Bridge CSV-Watch — LaunchAgent
+Beobachtet ~/Documents/MoneyMoney-Export/ und postet neue/geaenderte CSVs an
+dem Monatsplan-Dienst. Kein Polling-Daemon — alle 5 Minuten ein Single-Pass.
+
+Installation: mac/install.sh ersetzt __MAC_DIR__ durch den Ordner dieser Dateien und legt die Plist in
+~/Library/LaunchAgents ab (oder von Hand: __MAC_DIR__ ersetzen, kopieren, laden):
+  launchctl load -w ~/Library/LaunchAgents/com.fyos.moneymoney-bridge.plist
+
+Manueller Trigger:
+  launchctl start com.fyos.moneymoney-bridge
+
+Deaktivieren:
+  launchctl unload -w ~/Library/LaunchAgents/com.fyos.moneymoney-bridge.plist
+
+Re-Ingest aller Files:
+  python3 __MAC_DIR__/moneymoney_csv_watch.py --reset
+  launchctl start com.fyos.moneymoney-bridge
+
+Logs:
+  tail -f /tmp/fyos-moneymoney-bridge.log
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.fyos.moneymoney-bridge</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>__MAC_DIR__/moneymoney_csv_watch.py</string>
+        <string>--once</string>
+    </array>
+
+    <!-- Alle 5 Minuten ein Single-Pass. CSV-Aenderungen werden via mtime+size
+         erkannt, nur echte Diffs werden gepostet. -->
+    <key>StartInterval</key>
+    <integer>300</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/fyos-moneymoney-bridge.stdout</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/fyos-moneymoney-bridge.stderr</string>
+
+    <key>WorkingDirectory</key>
+    <string>__MAC_DIR__</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <!-- Hier die Adresse (FYOS_FINANZEN_URL oder MM_INGEST_URL) angeben, sonst ist die Bridge nicht eingerichtet.
+             Optional: eine Kopfzeile "Name: Wert" (FYOS_FINANZEN_AUTH_HEADER) oder, wenn der Dienst nur hinter
+             einer Anmeldung erreichbar ist, das Session-Cookie des Anmeldedienstes (FYOS_INGEST_COOKIE). -->
+    </dict>
+
+    <key>ThrottleInterval</key>
+    <integer>60</integer>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

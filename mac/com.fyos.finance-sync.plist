@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+BL-MONEYMONEY-PIPELINE-001 — launchd Job fuer MoneyMoney→FYOS Sync
+
+Installation: mac/install.sh ersetzt __MAC_DIR__ durch den Ordner dieser Dateien und legt die Plist in
+~/Library/LaunchAgents ab; danach:
+  launchctl load -w ~/Library/LaunchAgents/com.fyos.finance-sync.plist
+
+Deaktivieren:
+  launchctl unload -w ~/Library/LaunchAgents/com.fyos.finance-sync.plist
+
+Schedule: 2x taeglich (08:00 + 18:00 Lokalzeit)
+Logs: /tmp/fyos-finance-sync.log (stdout/stderr zusaetzlich nach
+       /tmp/fyos-finance-sync.stdout + .stderr)
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.fyos.finance-sync</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/osascript</string>
+        <string>__MAC_DIR__/moneymoney_export.scpt</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Hour</key>
+            <integer>8</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+        <dict>
+            <key>Hour</key>
+            <integer>18</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+    </array>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/fyos-finance-sync.stdout</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/fyos-finance-sync.stderr</string>
+
+    <key>WorkingDirectory</key>
+    <string>__MAC_DIR__</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <!-- Verhindert dass launchd den Job respawned wenn er schnell crasht -->
+    <key>ThrottleInterval</key>
+    <integer>300</integer>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>

@@ -1,0 +1,33 @@
+[build-system]
+# 77: erste Fassung mit Lizenz als SPDX-Ausdruck (PEP 639).
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fyos-plugin-finanzen"
+version = "0.2.0"
+description = "FYOS-Hub-Plugin Finanzen: Monatsplan, Kontostände und Umsätze aus MoneyMoney (Werkzeuge finance.*)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [{ name = "sirfyyn and FYOS CONTRIBUTORS" }]  # sauber: ok
+dependencies = ["fyos-hub"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.entry-points."mcp_hub.plugins"]
+finance = "fyos_plugin_finanzen.plugin:FinancePlugin"
+
+# Skills im Unterordner skills/ des Pakets; das Hub-Plugin `skills` findet sie über diese Gruppe.
+[project.entry-points."fyos.skills"]
+finanzen = "fyos_plugin_finanzen"
+
+[tool.setuptools]
+packages = ["fyos_plugin_finanzen"]
+
+[tool.setuptools.package-data]
+fyos_plugin_finanzen = ["skills/*/*.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
